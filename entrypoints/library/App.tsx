@@ -9,6 +9,7 @@ import {
   importBackup,
   onLibraryChange,
   setItemsStatus,
+  setItemFavorite,
 } from '../../lib/db';
 import { pluralize } from '../../lib/format';
 import type { Item, ItemStatus, Tag } from '../../lib/types';
@@ -28,6 +29,7 @@ import {
   PlusIcon,
   SearchIcon,
   SparkleIcon,
+  StarIcon,
   TagIcon,
   TrashIcon,
   UploadIcon,
@@ -35,6 +37,7 @@ import {
 } from '../../components/Icons';
 
 type StatusFilter = 'all' | ItemStatus;
+type FavoriteFilter = 'all' | 'favorite';
 type SortMode = 'new' | 'old' | 'updated' | 'title' | 'duration';
 type ViewMode = 'grid' | 'list';
 
@@ -89,6 +92,7 @@ export function App() {
 
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
+  const [favoriteFilter, setFavoriteFilter] = useState<FavoriteFilter>('all');
   const [activeTagIds, setActiveTagIds] = useState<string[]>([]);
   const [sort, setSort] = useState<SortMode>('new');
   const [view, setView] = useState<ViewMode>('grid');
@@ -165,6 +169,7 @@ export function App() {
 
     const result = items.filter((item) => {
       if (status !== 'all' && item.status !== status) return false;
+      if (favoriteFilter === 'favorite' && !item.favorite) return false;
       if (activeTagIds.length && !activeTagIds.every((id) => item.tagIds.includes(id))) return false;
       if (!normalized) return true;
 
@@ -191,13 +196,14 @@ export function App() {
     };
 
     return [...result].sort(sorters[sort]);
-  }, [items, status, activeTagIds, query, sort, tagById]);
+  }, [items, status, favoriteFilter, activeTagIds, query, sort, tagById]);
 
   const hasFilters =
-    status !== 'all' || activeTagIds.length > 0 || query.trim().length > 0;
+    status !== 'all' || favoriteFilter !== 'all' || activeTagIds.length > 0 || query.trim().length > 0;
 
   function resetFilters() {
     setStatus('all');
+    setFavoriteFilter('all');
     setActiveTagIds([]);
     setQuery('');
   }
@@ -233,6 +239,13 @@ export function App() {
     await setItemsStatus(selected, next);
     setSelected([]);
     setNotice('Статус обновлён');
+  }
+
+  async function handleToggleFavorite(item: Item) {
+    const favorite = !item.favorite;
+    await setItemFavorite(item.id, favorite);
+    await load();
+    setNotice(favorite ? 'Добавлено в избранное' : 'Убрано из избранного');
   }
 
   async function handleTagDelete(tag: Tag) {
@@ -366,6 +379,14 @@ export function App() {
                   count={statusCounts[value]}
                 />
               ))}
+
+              <FilterButton
+                active={favoriteFilter === 'favorite'}
+                onClick={() => setFavoriteFilter(favoriteFilter === 'favorite' ? 'all' : 'favorite')}
+                icon={<StarIcon className="h-4 w-4" fill="currentColor" />}
+                label="Избранное"
+                count={items.filter((item) => item.favorite).length}
+              />
 
             </nav>
 
@@ -630,6 +651,7 @@ export function App() {
                 onStatus={(target, next) =>
                   void setItemsStatus([target.id], next).then(() => setNotice('Статус обновлён'))
                 }
+                onToggleFavorite={(target) => void handleToggleFavorite(target)}
               />
             ))}
           </div>

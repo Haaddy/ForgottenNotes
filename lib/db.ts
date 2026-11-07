@@ -118,6 +118,7 @@ export interface SaveInput {
   durationSec?: number;
   startAtSec?: number;
   tagNames?: string[];
+  favorite?: boolean;
   status?: ItemStatus;
 }
 
@@ -153,6 +154,7 @@ export async function saveItem(input: SaveInput): Promise<SaveResult> {
       durationSec: input.durationSec ?? existing.durationSec,
       startAtSec: input.startAtSec ?? existing.startAtSec,
       tagIds: mergedTagIds,
+      favorite: input.favorite ?? existing.favorite ?? false,
       status: input.status ?? existing.status,
       updatedAt: now,
     };
@@ -175,6 +177,7 @@ export async function saveItem(input: SaveInput): Promise<SaveResult> {
     durationSec: input.durationSec,
     startAtSec: input.startAtSec,
     tagIds,
+    favorite: input.favorite ?? false,
     status: input.status ?? 'later',
     createdAt: now,
     updatedAt: now,
@@ -206,6 +209,11 @@ export async function setItemsStatus(ids: string[], status: ItemStatus): Promise
       await db.items.update(id, { status, updatedAt: Date.now() });
     }
   });
+  notifyChange();
+}
+
+export async function setItemFavorite(id: string, favorite: boolean): Promise<void> {
+  await db.items.update(id, { favorite, updatedAt: Date.now() });
   notifyChange();
 }
 

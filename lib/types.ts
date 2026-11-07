@@ -22,6 +22,7 @@ export interface Item {
   startAtSec?: number;
   tagIds: string[];
   status: ItemStatus;
+  favorite?: boolean;
   createdAt: number;
   updatedAt: number;
 }

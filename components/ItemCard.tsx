@@ -10,6 +10,7 @@ import {
   ExternalIcon,
   PencilIcon,
   RotateIcon,
+  StarIcon,
   TrashIcon,
 } from './Icons';
 
@@ -22,6 +23,7 @@ interface ItemCardProps {
   onEdit: (item: Item) => void;
   onDelete: (item: Item) => void;
   onStatus: (item: Item, status: ItemStatus) => void;
+  onToggleFavorite: (item: Item) => void;
 }
 
 function sourceLabel(item: Item): string {
@@ -42,6 +44,7 @@ export function ItemCard({
   onEdit,
   onDelete,
   onStatus,
+  onToggleFavorite,
 }: ItemCardProps) {
   const [thumbFailed, setThumbFailed] = useState(false);
   const href = urlForItem(item.url, item.type, item.startAtSec);
@@ -90,6 +93,16 @@ export function ItemCard({
 
   const actions = (
     <div className="flex items-center gap-0.5">
+      <button
+        type="button"
+        className={`btn-ghost rounded-md p-1.5 ${item.favorite ? 'text-amber-500 hover:text-amber-600' : ''}`}
+        title={item.favorite ? 'Убрать из избранного' : 'В избранное'}
+        aria-label={item.favorite ? 'Убрать из избранного' : 'В избранное'}
+        aria-pressed={Boolean(item.favorite)}
+        onClick={() => onToggleFavorite(item)}
+      >
+        <StarIcon className="h-4 w-4" fill={item.favorite ? 'currentColor' : 'none'} />
+      </button>
       <a
         href={href}
         target="_blank"

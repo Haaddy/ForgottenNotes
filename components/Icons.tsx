@@ -177,6 +177,12 @@ export const TagIcon = (props: IconProps) => (
   </Icon>
 );
 
+export const StarIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="m12 3 2.75 5.57 6.15.9-4.45 4.33 1.05 6.12L12 17.03l-5.5 2.89 1.05-6.12L3.1 9.47l6.15-.9Z" />
+  </Icon>
+);
+
 export const InboxIcon = (props: IconProps) => (
   <Icon {...props}>
     <path d="M3 13h5l1.5 2.5h5L16 13h5" />
