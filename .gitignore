@@ -1,0 +1,8 @@
+node_modules
+.wxt
+.output
+dist
+*.zip
+.env
+.env.*
+.DS_Store
